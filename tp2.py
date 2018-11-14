@@ -1,3 +1,3 @@
 from assignment import Assignment
 
-assignment_2 = Assignment("tp2_data.csv")
+assignment_2 = Assignment("./data/tp2_data.csv")
