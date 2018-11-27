@@ -42,8 +42,8 @@ class Assignment:
         kmeans = KMeans(n_clusters = k).fit(coords)
         labels = kmeans.predict(coords)
         centroids = kmeans.cluster_centers_
-        print(silhouette_score(coords, labels))
-        #plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
+        # print(silhouette_score(coords, labels))
+        plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
 
 
     def gaussian_mix(self, num_components):
@@ -53,8 +53,10 @@ class Assignment:
         #o gmm.predict_proba(coords) da-nos o grau de pertenca de cada ponto as diferentes gaussianas
 
 
-    # def dbscan(self, eps):
+    def dbscan(self):
         # dbscan = DBSCAN(0.5, )
+        coords = self.data[["x", "y", "z"]].values
+        select_epsilon(coords)
 
 
 #Maybe identify where they're more dense with DBSCAN varying number of neighbours (how many sisms ocour near eachother to be relevant), value of epislon (the distance the sisms have to be to each other to be relevant)
@@ -65,4 +67,4 @@ class Assignment:
 #     - Implement DBSCAN parameter choice method
 #     - Implement Rand Index
 #     - Implement Graphics
-#     - Perguntar ao stor sobre a distancia e sobre os pontos do kmeans estarem "dentro" do planeta
+#     - Ter plots dos params vs scores
