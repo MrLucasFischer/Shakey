@@ -47,7 +47,7 @@ def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k'):
 
 
 
-def plot_3D (x ,y, z):
+def plot_3D (x, y, z):
     """
         Function that plots the data into a 3D plane
         Params:
@@ -58,5 +58,23 @@ def plot_3D (x ,y, z):
     fig = plt.figure(figsize = (10, 10))
     ax = fig.add_subplot(111, projection = '3d')
     ax.scatter(x, y, z, s = 10)
+    ax.axis("equal")    #Garantee that axis have the same distance
+    plt.show()
+
+
+
+
+def plot_3D_with_centroids (x, y, z, x_centroids, y_centroids, z_centroids):
+    """
+        Function that plots the data into a 3D plane
+        Params:
+            x - x vector values
+            y - y vector values
+            z - z vector values
+    """
+    fig = plt.figure(figsize = (10, 10))
+    ax = fig.add_subplot(111, projection = '3d')
+    ax.scatter(x, y, z, s = 10, c = "blue")
+    ax.scatter(x_centroids, y_centroids, z_centroids, s = 10, c = "red")
     ax.axis("equal")    #Garantee that axis have the same distance
     plt.show()

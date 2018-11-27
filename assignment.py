@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
-
+from helper_functions import *
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.mixture import GaussianMixture
 
 class Assignment:
     """
@@ -30,5 +32,26 @@ class Assignment:
         self.data["y"] = self.EARTH_RADIUS * np.cos(self.data["latitude"] * (np.pi/180.0)) * np.sin(self.data["longitude"] * (np.pi/180.0))
         self.data["z"] = self.EARTH_RADIUS * np.sin(self.data["latitude"] * (np.pi/180.0))
         
-        # plot_3D(self.data["x"],self.data["y"],self.data["z"])
+        #plot_3D(self.data["x"],self.data["y"],self.data["z"])
         # plot_classes(self.data["fault"], self.data["longitude"], self.data["latitude"])
+
+
+    def k_means(self, k):
+        coords = self.data[["x", "y", "z"]].values
+        kmeans = KMeans(n_clusters = k).fit(coords)
+        labels = kmeans.predict(coords)
+        centroids = kmeans.cluster_centers_
+        # plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
+
+
+    def gaussian_mix(self, num_components):
+        coords = self.data[["x", "y", "z"]].values
+        gmm = GaussianMixture(n_components =  num_components).fit(coords)
+        labels = gmm.predict(coords)
+
+    # def dbscan(self, eps):
+        # dbscan = DBSCAN(0.5, )
+
+
+
+#Maybe identify where they're more dense with DBSCAN varying number of neighbours (how many sisms ocour near eachother to be relevant), value of epislon (the distance the sisms have to be to each other to be relevant)
