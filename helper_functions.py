@@ -75,6 +75,6 @@ def plot_3D_with_centroids (x, y, z, x_centroids, y_centroids, z_centroids):
     fig = plt.figure(figsize = (10, 10))
     ax = fig.add_subplot(111, projection = '3d')
     ax.scatter(x, y, z, s = 10, c = "blue")
-    ax.scatter(x_centroids, y_centroids, z_centroids, s = 10, c = "red")
+    ax.scatter(x_centroids, y_centroids, z_centroids, s = 100, c = "red")
     ax.axis("equal")    #Garantee that axis have the same distance
     plt.show()
