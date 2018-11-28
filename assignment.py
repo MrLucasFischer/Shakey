@@ -32,7 +32,6 @@ class Assignment:
         self.data["x"] = self.EARTH_RADIUS * np.cos(self.data["latitude"] * (np.pi/180.0)) * np.cos(self.data["longitude"] * (np.pi/180.0))
         self.data["y"] = self.EARTH_RADIUS * np.cos(self.data["latitude"] * (np.pi/180.0)) * np.sin(self.data["longitude"] * (np.pi/180.0))
         self.data["z"] = self.EARTH_RADIUS * np.sin(self.data["latitude"] * (np.pi/180.0))
-        
         #plot_3D(self.data["x"],self.data["y"],self.data["z"])
         # plot_classes(self.data["fault"], self.data["longitude"], self.data["latitude"])
 
@@ -42,7 +41,8 @@ class Assignment:
         kmeans = KMeans(n_clusters = k).fit(coords)
         labels = kmeans.predict(coords)
         centroids = kmeans.cluster_centers_
-        # print(silhouette_score(coords, labels))
+        print(silhouette_score(coords, labels))
+        print(rand_index(self.data["fault"].values, labels))
         plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
 
 
@@ -50,13 +50,19 @@ class Assignment:
         coords = self.data[["x", "y", "z"]].values
         gmm = GaussianMixture(n_components =  num_components).fit(coords)
         labels = gmm.predict(coords)
+        print(silhouette_score(coords, labels))
+        print(rand_index(self.data["fault"].values, labels))
         #o gmm.predict_proba(coords) da-nos o grau de pertenca de cada ponto as diferentes gaussianas
 
 
     def dbscan(self):
-        # dbscan = DBSCAN(0.5, )
         coords = self.data[["x", "y", "z"]].values
-        select_epsilon(coords)
+        estimated_epsilon = select_epsilon(coords)
+        dbscan = DBSCAN(eps = estimated_epsilon, min_samples = 4).fit(coords)
+        labels = dbscan.labels_
+        print(silhouette_score(coords, labels))
+        print(rand_index(self.data["fault"].values, labels))
+
 
 
 #Maybe identify where they're more dense with DBSCAN varying number of neighbours (how many sisms ocour near eachother to be relevant), value of epislon (the distance the sisms have to be to each other to be relevant)
@@ -64,7 +70,8 @@ class Assignment:
 # TODO
 #     - Find a way to choose K in k k means
 #     - Find a way to choose the number of components in gaussian mixture model
-#     - Implement DBSCAN parameter choice method
-#     - Implement Rand Index
 #     - Implement Graphics
 #     - Ter plots dos params vs scores
+#     - Para o Kmeans secalhar o vector quantization
+#     - Para o DBSCAN buscar os pontos de maior densidade de sismos
+#     - Se calhar usar o GMM para ir buscar "interseções" entre faults, ou zonas que sejam "influenciadas" por varias faults (que é a area da gaussiana)

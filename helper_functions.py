@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from skimage.io import imsave, imread
 from mpl_toolkits import mplot3d
 from sklearn.neighbors import KNeighborsClassifier
+import itertools
 
 def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k'):
     """
@@ -81,26 +82,48 @@ def plot_3D_with_centroids (x, y, z, x_centroids, y_centroids, z_centroids):
 
 
 def select_epsilon(coords):
-    num_lines = len(coords)
-    y_column = np.zeros(num_lines)
+    """
+        Function that selects the estimated epsilon value from the user
 
-    knn = KNeighborsClassifier(4).fit(coords, y_column)
+        Params:
+            coords - Coordinates of seismic events
 
-    distances = knn.kneighbors(n_neighbors = 4)[0]
-    fourth_distance = distances[:, 3]
-    fourth_distance[::-1].sort() #Ordering
-    get_user_epsilon(fourth_distance)
+        Returns 
+            The user's estimated epsilon value
+    """
+
+    num_lines = len(coords) #Get the number of rows from the coordinates
+    y_column = np.zeros(num_lines)  #Create a zero filed vector. This parameter is ignored
+
+    #KneighborsClassifier is not used as a classifier
+    #It's simply used in order to obtain the distance to the 4th nearest neighbor of each poin
+    knn = KNeighborsClassifier(4).fit(coords, y_column) #Fit the KNeighboursClassifier to our data
+
+    distances = knn.kneighbors(n_neighbors = 4)[0] 
+    fourth_distance = distances[:, 3]   #Get the distances to the 4th neighbors of each point
+    fourth_distance[::-1].sort()    #Sorting our distances list in descending order
+    return get_user_epsilon(fourth_distance)
     
 
 def get_user_epsilon(distances):
+    """
+        Function that will ask the user for a noise percentage in order to choose the epsilon value
+
+        Param:
+            distances - A list of distances to the 4th nearest neighbor of each point
+
+        Returns
+            The user's estimated epsilon value
+    """
+
     accepted = False
     epsilon_value = -1
 
     while(not accepted):
         user_noise_percentage = input("\nInsert a noise percentage estimate (0 - 100): ")
         try:
-            user_percentage = float(user_noise_percentage)  #TODO ISTO ESTA A DAR MAL QUANDO METO 100 DA FUCK ??????????????????????????????????????
-            if(user_percentage < 0.0 or user_percentage > 100.0):
+            user_percentage = float(user_noise_percentage)
+            if(user_percentage < 0.0 or user_percentage >= 100.0):
                 raise Exception
             else:
                 noise_percentage = user_percentage / 100
@@ -116,10 +139,22 @@ def get_user_epsilon(distances):
     
 
 def plot_distances(distances, noise_percentage):
+    """
+        Function that will plot the distances vs points and will ask the user for its opinion
+
+        Params:
+            distances - A list of distances to the 4th nearest neighbor of each point
+            noise_percentage - A float value corresponding to an estimated percentage of noise in our data set
+
+        Rerturns
+            user_opinion - A string with information about if the user accepted this epsilon value or not
+            epsilon_value - The user's estimated epsilon value
+    """
+
     num_points = len(distances)
     points = list(range(1,  num_points + 1))
     
-    epsilon_value = distances[int(num_points * noise_percentage) + 1]
+    epsilon_value = distances[int((num_points - 1) * noise_percentage) + 1]
 
     plt.figure(figsize = (11, 8))
     font = {
@@ -130,6 +165,7 @@ def plot_distances(distances, noise_percentage):
     plt.axvline(x = epsilon_value, color = "red", label = f"Epsilon Value: {round(epsilon_value, 3)}")
     plt.xlabel("Distance to the 4th neighbor")
     plt.ylabel("Points")
+    plt.legend()
     plt.show()
 
     valid_answer = False
@@ -142,3 +178,48 @@ def plot_distances(distances, noise_percentage):
             print("\nPlease insert an answer (y/n)")
 
     return user_opinion, epsilon_value
+
+
+
+def rand_index(faults, labels):
+    """
+        Function that calculates the Rand index metrics (precision, reacall, rand index, F1)
+
+        Params:
+            faults - number of the fault the point belongs to (-1 if it does not belong to any fault)
+            labels - label of cluster the point was assigned to
+
+        Returns:
+            The metrics calculated from the Rand index (precision, recall, rand index and F1)
+    """
+    mapping_function = lambda pair: int(pair[0] == pair[1])
+
+    labels_combinations = list(map(mapping_function, itertools.combinations(labels, 2)))
+    faults_combinations = list(map(mapping_function, itertools.combinations(faults, 2)))
+
+
+    #Transfrorm the arguments into numpy arrays
+    labels_combinations = np.array(labels_combinations)
+    faults_combinations = np.array(faults_combinations)
+
+    #Examples
+    # predictions  = [1, 0, 1, 1, 0]
+    # ground_truth = [0, 0, 1, 1, 1]
+
+    # predictions AND ground_truth     = [0, 0, 1, 1, 0] -> Gives us the true positives
+    # predictions OR  ground_truth     = [1, 0, 1, 1, 0] -> This minus the true positives gives us the false positive (the first 1)
+    # NOT predictions AND ground_truth = [0, 0, 0, 0, 1] -> Gives us the false negative
+
+    num_combs = len(labels_combinations)
+
+    true_positives = np.sum(np.logical_and(labels_combinations, faults_combinations))
+    false_positives = np.sum(np.logical_or(labels_combinations, faults_combinations)) - true_positives
+    false_negatives = np.sum(np.logical_and(np.logical_not(labels_combinations), faults_combinations))
+    true_negatives = num_combs - (true_positives + false_positives + false_negatives)
+
+    precision = true_positives / (true_positives + false_positives)
+    recall = true_positives / (true_positives + false_negatives)
+    rand = (true_positives + true_negatives) / num_combs
+    f1 = 2 * (precision * recall / (precision + recall))
+
+    return precision, recall, rand, f1
