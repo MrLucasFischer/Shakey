@@ -36,26 +36,64 @@ class Assignment:
         # plot_classes(self.data["fault"], self.data["longitude"], self.data["latitude"])
 
 
-    def k_means(self, k):
-        coords = self.data[["x", "y", "z"]].values
-        kmeans = KMeans(n_clusters = k).fit(coords)
-        labels = kmeans.predict(coords)
-        centroids = kmeans.cluster_centers_
-        print(silhouette_score(coords, labels))
-        print(rand_index(self.data["fault"].values, labels))
-        plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
+    def k_means(self, ks):
+        """
+            Computes the K-Means algorithm for this objects data and for the given K values
+        """
+
+        coords = self.data[["x", "y", "z"]].values  #Get the coordinate values from our data
+        k_silh = []
+
+        if(not type(ks) is list):
+            ks = [ks]   #We can pass in a number or a list of numbers, if it's not a list then convert it to one
+
+        for k in ks:
+            kmeans = KMeans(n_clusters = k).fit(coords)
+            labels = kmeans.predict(coords)
+            centroids = kmeans.cluster_centers_
+
+            silh_score = silhouette_score(coords, labels)
+            print(silh_score)
+            print(rand_index(self.data["fault"].values, labels))
+
+            k_silh.append((k, silh_score))
+            # plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
+
+        plot_params(np.array(k_silh)) #Plot the different k values vs their silhouette scores
+
 
 
     def gaussian_mix(self, num_components):
+        """
+            Computes the Gaussian Mixture Model algorithm for this objects data and for the given number of components
+        """
+
         coords = self.data[["x", "y", "z"]].values
-        gmm = GaussianMixture(n_components =  num_components).fit(coords)
-        labels = gmm.predict(coords)
-        print(silhouette_score(coords, labels))
-        print(rand_index(self.data["fault"].values, labels))
-        #o gmm.predict_proba(coords) da-nos o grau de pertenca de cada ponto as diferentes gaussianas
+        ncomponents_silh = []
+
+        if(not type(num_components) is list):
+            num_components = [num_components]   #We can pass in a number or a list of numbers, if it's not a list then convert it to one
+
+        for num in num_components:
+            gmm = GaussianMixture(n_components =  num).fit(coords)
+            labels = gmm.predict(coords)
+
+            silh_score = silhouette_score(coords, labels)
+            print(silh_score)
+            print(rand_index(self.data["fault"].values, labels))
+            
+            ncomponents_silh.append((num, silh_score))
+            #o gmm.predict_proba(coords) da-nos o grau de pertenca de cada ponto as diferentes gaussianas
+
+        plot_params(np.array(ncomponents_silh), algorithm = "gmm") #Plot the different number of components vs their silhouette scores
+
 
 
     def dbscan(self):
+        """
+            Computes the DBSCAN algorithm for this objects data and with a Epsilon choosen in the select_epsilon method
+        """
+
         coords = self.data[["x", "y", "z"]].values
         estimated_epsilon = select_epsilon(coords)
         dbscan = DBSCAN(eps = estimated_epsilon, min_samples = 4).fit(coords)

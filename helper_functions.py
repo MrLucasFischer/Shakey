@@ -158,8 +158,9 @@ def plot_distances(distances, noise_percentage):
 
     plt.figure(figsize = (11, 8))
     font = {
-    'weight' : 'regular',
-    'size'   : 24}
+        'weight' : 'regular',
+        'size'   : 24
+    }
     plt.rc('font', **font)
     plt.plot(distances, points)
     plt.axvline(x = epsilon_value, color = "red", label = f"Epsilon Value: {round(epsilon_value, 3)}")
@@ -223,3 +224,22 @@ def rand_index(faults, labels):
     f1 = 2 * (precision * recall / (precision + recall))
 
     return precision, recall, rand, f1
+
+
+def plot_params(params_silhouette, algorithm = "kmean"):
+    """
+        Plots the different params (K or Number of Components) vs the silhouette score obtained for them
+    """
+    x_label = "K" if(algorithm == "kmean") else "Number of Components"
+
+    plt.figure(figsize = (11, 8))
+    font = {
+    'weight' : 'regular',
+    'size'   : 24}
+    plt.rc('font', **font)
+
+    plt.plot(params_silhouette[:, 0], params_silhouette[:, 1])  #TODO when we only have one entry on the list it shows nothing
+
+    plt.xlabel(x_label)
+    plt.ylabel("Silhouette Score")
+    plt.show()
