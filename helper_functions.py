@@ -37,11 +37,11 @@ def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k'):
     for lab in diffs[diffs >= 0]:
         mask = labels == lab
         nots = np.logical_or(nots,mask)
-        plt.plot(x[mask], y[mask], 'o', markersize = 4, mew = 1, zorder = 1, alpha = alpha, markeredgecolor = edge)
+        plt.plot(x[mask], y[mask], 'o', markersize = 10, mew = 1, zorder = 1, alpha = alpha, markeredgecolor = edge)
         ix = ix + 1
     mask = np.logical_not(nots)
     if np.sum(mask) > 0:
-        plt.plot(x[mask], y[mask], '.', markersize = 1, mew = 1, markerfacecolor = 'w', markeredgecolor = edge)
+        plt.plot(x[mask], y[mask], '.', markersize = 2, mew = 1, markerfacecolor = 'w', markeredgecolor = edge)
     plt.show()
     plt.axis('off')
 
@@ -162,10 +162,10 @@ def plot_distances(distances, noise_percentage):
         'size'   : 24
     }
     plt.rc('font', **font)
-    plt.plot(distances, points)
-    plt.axvline(x = epsilon_value, color = "red", label = f"Epsilon Value: {round(epsilon_value, 3)}")
-    plt.xlabel("Distance to the 4th neighbor")
-    plt.ylabel("Points")
+    plt.plot(points, distances)
+    plt.axhline(y = epsilon_value, color = "red", label = f"Epsilon Value: {round(epsilon_value, 3)}")
+    plt.ylabel("Distance to the 4th neighbor")
+    plt.xlabel("Points")
     plt.legend()
     plt.show()
 
@@ -193,7 +193,6 @@ def rand_index(faults, labels):
         Returns:
             The metrics calculated from the Rand index (precision, recall, rand index and F1)
     """
-    mapping_function = lambda pair: int(pair[0] == pair[1])
 
     true_positives = 0
     false_positives_partial = 0
@@ -240,8 +239,28 @@ def plot_params(params_silhouette, algorithm = "kmean"):
     'size'   : 24}
     plt.rc('font', **font)
 
-    plt.plot(params_silhouette[:, 0], params_silhouette[:, 1])  #TODO when we only have one entry on the list it shows nothing
+    plt.plot(params_silhouette[:, 0], params_silhouette[:, 1])  #TODO plot other metrics (param vs rand index, params vs precision etc...)
 
     plt.xlabel(x_label)
     plt.ylabel("Silhouette Score")
     plt.show()
+
+
+def get_number_of_points_in_clusters(labels):
+    number_of_clusters = len(set(labels)) - 1   #We subtract 1 to remove the "-1" label (which is the label for noise)
+    x_axis = []
+    y_axis = []
+
+    for cluster in range(0, number_of_clusters):
+        x_axis.append(cluster)
+        y_axis.append(np.sum(labels == cluster))
+
+    plt.close()
+    plt.figure()    #TODO AUMENTAR O TAMANHO DA IMAGE
+    plt.bar(x = x_axis, height = y_axis)
+    plt.xticks(x_axis, x_axis)
+    plt.yticks(y_axis, y_axis)
+    plt.show()
+
+    #TODO Add an analysis to the mean of the distances in the clusters
+    #TODO Por os clusters coloridos com o nº de elems que têm 

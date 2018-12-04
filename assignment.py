@@ -89,27 +89,23 @@ class Assignment:
 
 
 
-    def dbscan(self):
+    def dbscan(self, epsilons = None):
         """
             Computes the DBSCAN algorithm for this objects data and with a Epsilon choosen in the select_epsilon method
         """
-
         coords = self.data[["x", "y", "z"]].values
-        estimated_epsilon = select_epsilon(coords)
-        dbscan = DBSCAN(eps = estimated_epsilon, min_samples = 4).fit(coords)
-        labels = dbscan.labels_
-        print(silhouette_score(coords, labels))
-        print(rand_index(self.data["fault"].values, labels))
 
-
-
-#Maybe identify where they're more dense with DBSCAN varying number of neighbours (how many sisms ocour near eachother to be relevant), value of epislon (the distance the sisms have to be to each other to be relevant)
-
-# TODO
-#     - Find a way to choose K in k k means
-#     - Find a way to choose the number of components in gaussian mixture model
-#     - Implement Graphics
-#     - Ter plots dos params vs scores
-#     - Para o Kmeans secalhar o vector quantization
-#     - Para o DBSCAN buscar os pontos de maior densidade de sismos
-#     - Se calhar usar o GMM para ir buscar "interseções" entre faults, ou zonas que sejam "influenciadas" por varias faults (que é a area da gaussiana)
+        if(epsilons is None):
+            estimated_epsilon = select_epsilon(coords)
+            dbscan = DBSCAN(eps = estimated_epsilon, min_samples = 4).fit(coords)
+            labels = dbscan.labels_
+            print(silhouette_score(coords, labels))
+            print(rand_index(self.data["fault"].values, labels))
+        else:
+            for epsilon in epsilons:
+                dbscan = DBSCAN(eps = epsilon, min_samples = 4).fit(coords)
+                labels = dbscan.labels_
+                get_number_of_points_in_clusters(labels)
+                print(silhouette_score(coords, labels))
+                print(rand_index(self.data["fault"].values, labels))
+                plot_classes(labels, self.data["longitude"].values, self.data["latitude"].values)
