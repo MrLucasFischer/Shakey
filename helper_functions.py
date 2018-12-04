@@ -195,13 +195,22 @@ def rand_index(faults, labels):
     """
     mapping_function = lambda pair: int(pair[0] == pair[1])
 
-    labels_combinations = list(map(mapping_function, itertools.combinations(labels, 2)))
-    faults_combinations = list(map(mapping_function, itertools.combinations(faults, 2)))
+    true_positives = 0
+    false_positives_partial = 0
+    false_negatives = 0
+    num_combs = 0
 
+    for i in range(0 , len(faults) - 1):
+        same_label = labels[i] == labels[i + 1:]
+        same_cluster = faults[i] == faults[i + 1:]
 
-    #Transfrorm the arguments into numpy arrays
-    labels_combinations = np.array(labels_combinations)
-    faults_combinations = np.array(faults_combinations)
+        true_positives += np.sum(np.logical_and(same_label, same_cluster))  #Summing the total number of true positives found up until this point
+        false_positives_partial += np.sum(np.logical_or(same_label, same_cluster))  #To have the actual number of false positives we need to subtract the total number of true positives outside the for loop
+        false_negatives += np.sum(np.logical_and(np.logical_not(same_label), same_cluster)) #Summing the total number of false negatives found up until this point
+        num_combs += len(same_cluster) #Summing the number of combinations up until this point
+
+    false_positives = false_positives_partial - true_positives
+    true_negatives = num_combs - (true_positives + false_positives + false_negatives)
 
     #Examples
     # predictions  = [1, 0, 1, 1, 0]
@@ -210,13 +219,6 @@ def rand_index(faults, labels):
     # predictions AND ground_truth     = [0, 0, 1, 1, 0] -> Gives us the true positives
     # predictions OR  ground_truth     = [1, 0, 1, 1, 0] -> This minus the true positives gives us the false positive (the first 1)
     # NOT predictions AND ground_truth = [0, 0, 0, 0, 1] -> Gives us the false negative
-
-    num_combs = len(labels_combinations)
-
-    true_positives = np.sum(np.logical_and(labels_combinations, faults_combinations))
-    false_positives = np.sum(np.logical_or(labels_combinations, faults_combinations)) - true_positives
-    false_negatives = np.sum(np.logical_and(np.logical_not(labels_combinations), faults_combinations))
-    true_negatives = num_combs - (true_positives + false_positives + false_negatives)
 
     precision = true_positives / (true_positives + false_positives)
     recall = true_positives / (true_positives + false_negatives)
