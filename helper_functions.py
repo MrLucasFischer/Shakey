@@ -240,6 +240,7 @@ def plot_params(params_silhouette, precision = None, recall = None, rand = None,
     else:
         x_label = "epsilon"
 
+    plt.close()
     plt.figure(figsize = (11, 8))
     font = {
     'weight' : 'regular',
