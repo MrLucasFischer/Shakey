@@ -5,14 +5,17 @@ from mpl_toolkits import mplot3d
 from sklearn.neighbors import KNeighborsClassifier
 import itertools
 
-def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k'):
+__image_dir = "./images"
+
+def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k', algorithm = "kmeans", param = -1):
     """
         Plot seismic events using Mollweide projection.
         Arguments are the cluster labels and the longitude and latitude
         vectors of the events
     """
-    img = imread("./images/Mollweide_projection_SW.jpg")
-    plt.figure(figsize = (10,5), frameon = False)
+
+    img = imread(__image_dir + "/Mollweide_projection_SW.jpg")
+    plt.figure(figsize = (13,8), frameon = False)
     x = lon / 180* np.pi
     y = lat / 180 * np.pi
     ax = plt.subplot(111, projection = "mollweide")
@@ -25,7 +28,7 @@ def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k'):
     clims = np.array([(-np.pi, 0), (np.pi, 0), (0, -np.pi/2), (0, np.pi/2)])
     lims = ax.transData.transform(clims)
     plt.close()
-    plt.figure(figsize = (10, 5), frameon = False)
+    plt.figure(figsize = (13, 8), frameon = False)
     plt.subplot(111)
     plt.imshow(img, zorder = 0, extent = [lims[0, 0], lims[1, 0], lims[2, 1], lims[3, 1]], aspect = 1)
 
@@ -42,7 +45,12 @@ def plot_classes(labels,lon,lat, alpha=0.5, edge = 'k'):
     mask = np.logical_not(nots)
     if np.sum(mask) > 0:
         plt.plot(x[mask], y[mask], '.', markersize = 2, mew = 1, markerfacecolor = 'w', markeredgecolor = edge)
+
+    file_name = f"projection_algo={algorithm}_parm={round(param, 1)}.png"
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
     plt.show()
+    plt.close()
     plt.axis('off')
 
 
@@ -65,7 +73,7 @@ def plot_3D (x, y, z):
 
 
 
-def plot_3D_with_centroids (x, y, z, x_centroids, y_centroids, z_centroids):
+def plot_3D_with_centroids (x, y, z, x_centroids, y_centroids, z_centroids, param = -1):
     """
         Function that plots the data into a 3D plane
         Params:
@@ -78,7 +86,12 @@ def plot_3D_with_centroids (x, y, z, x_centroids, y_centroids, z_centroids):
     ax.scatter(x, y, z, s = 10, c = "blue")
     ax.scatter(x_centroids, y_centroids, z_centroids, s = 100, c = "red")
     ax.axis("equal")    #Garantee that axis have the same distance
+
+    file_name = f"3d_plot_param={param}.png"
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
     plt.show()
+    plt.close()
 
 
 def select_epsilon(coords):
@@ -227,11 +240,18 @@ def rand_index(faults, labels):
     return precision, recall, rand, f1
 
 
-def plot_params(params_silhouette, precision = None, recall = None, rand = None, f1 = None, algorithm = "kmean"):
+def plot_params(param_metrics, algorithm = "kmean", file_name = "k_vs_metrics.png"):
     """
-        Plots the different params (K or Number of Components) vs the silhouette score obtained for them
+        Plots the different params (K, Number of Components or Epsilons) vs the silhouette score, 
+        the precision, the recall, the rand and the f1 metrics obtained for them
     """
-    #x_label = "K" if(algorithm == "kmean") else "Number of Components"
+
+    x_axis = param_metrics[:, 0]
+    silhouette_score = param_metrics[:, 1]
+    precision = param_metrics[:, 2]
+    recall = param_metrics[:, 3]
+    rand = param_metrics[:, 4]
+    f1 = param_metrics[:, 5]
 
     if (algorithm == "kmean"):
         x_label = "K"
@@ -247,26 +267,27 @@ def plot_params(params_silhouette, precision = None, recall = None, rand = None,
     'size'   : 24}
     plt.rc('font', **font)
 
-    x_axis = params_silhouette[:, 0]
-
-    plt.plot(params_silhouette[:, 0], params_silhouette[:, 1], "-", linewidth = 3 ,label = "silhouette score")  #TODO plot other metrics (param vs rand index, params vs precision etc...)
-
-    if precision is not None: # we don't need to test the others because they are all calculated at the same time
-        plt.plot(x_axis, precision, "-", linewidth = 3 ,label = "precision" )
-        plt.plot(x_axis, recall, "-", linewidth = 3 ,label = "recall" )
-        plt.plot(x_axis, rand, "-", linewidth = 3 ,label = "rand" )
-        plt.plot(x_axis, f1, "-", linewidth = 3 ,label = "f1" )
+    plt.plot(x_axis, silhouette_score, "-", linewidth = 3 ,label = "silhouette score")
+    plt.plot(x_axis, precision, "-", linewidth = 3 ,label = "precision")
+    plt.plot(x_axis, recall, "-", linewidth = 3 ,label = "recall")
+    plt.plot(x_axis, rand, "-", linewidth = 3 ,label = "rand")
+    plt.plot(x_axis, f1, "-", linewidth = 3 ,label = "f1")
 
     plt.xlabel(x_label)
-    if precision is None:
-        plt.ylabel("Silhouette Score")
-    else:
-        plt.ylabel("Metrics")
+    plt.ylabel("Metrics")
     plt.legend()
+
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
     plt.show()
+    plt.close()
 
 
-def get_number_of_points_in_clusters(labels):
+def plot_number_of_points_in_clusters(labels, epsilon):
+    """
+        Barplot of the total number of points inside a cluster for each cluster
+    """
+
     number_of_clusters = len(set(labels)) - 1   #We subtract 1 to remove the "-1" label (which is the label for noise)
     x_axis = []
     y_axis = []
@@ -276,15 +297,28 @@ def get_number_of_points_in_clusters(labels):
         y_axis.append(np.sum(labels == cluster))
 
     plt.close()
-    plt.figure(figsize = (15, 6))    #TODO AUMENTAR O TAMANHO DA IMAGE
+    plt.figure(figsize = (15, 8))
+    plt.title("# Points per cluster")
     plt.bar(x = x_axis, height = y_axis)
+    plt.axhline(y = 4, linestyle = "--", color='r', label = "4 point clusters")
+    plt.legend()
+    plt.xlabel("Cluster Labels")
+    plt.ylabel("# Points in Cluster")
     plt.xticks(x_axis[::5], x_axis[::5])
-    plt.yticks(y_axis, y_axis)
+    plt.yticks(range(int(np.max(y_axis)))[::10], range(int(np.max(y_axis)))[::10])
+
+    file_name = f"num_points_in_cluster_eps={round(epsilon, 1)}.png"
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
     plt.show()
+    plt.close()
 
 
-def get_mean_distances_in_clusters(coords,labels):
-    pass
+def plot_mean_distances_in_clusters(coords, labels, epsilon):
+    """
+        Barplot of the mean distances of points inside the same cluster for each cluster
+    """
+
     number_of_clusters = len(set(labels)) - 1
 
     x_axis = [] # cluster label
@@ -292,16 +326,29 @@ def get_mean_distances_in_clusters(coords,labels):
 
     for cluster in range(0, number_of_clusters):
         # Get coordinates of points in this cluster
-        inds = find(labels == cluster)
-        npoints = len(inds)
-        coords_cluster = coords[inds]
+        coords_cluster = coords[labels == cluster]
+        n_points = len(coords_cluster)
+        
         # Set up knn and get distances
-        knn = KNeighborsClassifier(npoints-1).fit(coords_cluster, np.zeros(npoints)) #Fit the KNeighboursClassifier to our data
-        distances = knn.kneighbors()[0] 
-        # Do mean of these distances
-        # Add mean to list
-    
+        knn = KNeighborsClassifier(n_points - 1).fit(coords_cluster, np.zeros(n_points)) #Fit the KNeighboursClassifier to this cluster points
+        distances = knn.kneighbors()[0] #Obtain the distances of the points inside this cluster with KNeighborsClassifier
 
+        x_axis.append(cluster)  #Add the current cluster to the x_axis
+        y_axis.append(np.mean(distances)) # Add mean to list
+        
+    plt.close()
+    plt.figure(figsize = (15, 8))
+    plt.title('Mean intra-cluster distance')
+    plt.bar(x = x_axis, height = y_axis)
+    plt.xlabel("Cluster Labels")
+    plt.ylabel("Mean distance within cluster")
+    plt.xticks(x_axis[::5], x_axis[::5])
+    plt.yticks(range(int(np.max(y_axis)))[::10], range(int(np.max(y_axis)))[::10] )
 
-    #TODO Add an analysis to the mean of the distances in the clusters
-    #TODO Por os clusters coloridos com o nº de elems que têm 
+    file_name = f"dist_within_cluster_eps={round(epsilon, 1)}.png"
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
+    plt.show()
+    plt.close()
+
+    #TODO Por os clusters coloridos com o nº de elems que têm
