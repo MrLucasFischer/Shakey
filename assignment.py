@@ -132,6 +132,7 @@ class Assignment:
                 dbscan = DBSCAN(eps = epsilon, min_samples = 4).fit(coords)
                 labels = dbscan.labels_
                 get_number_of_points_in_clusters(labels)
+                get_mean_distances_in_clusters(coords,labels)
                 print("Silhouette")
                 silh_score = silhouette_score(coords, labels)
                 epsilons_silh.append((epsilon, silh_score))

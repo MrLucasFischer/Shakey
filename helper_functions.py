@@ -282,5 +282,26 @@ def get_number_of_points_in_clusters(labels):
     plt.yticks(y_axis, y_axis)
     plt.show()
 
+
+def get_mean_distances_in_clusters(coords,labels):
+    pass
+    number_of_clusters = len(set(labels)) - 1
+
+    x_axis = [] # cluster label
+    y_axis = [] # mean distances
+
+    for cluster in range(0, number_of_clusters):
+        # Get coordinates of points in this cluster
+        inds = find(labels == cluster)
+        npoints = len(inds)
+        coords_cluster = coords[inds]
+        # Set up knn and get distances
+        knn = KNeighborsClassifier(npoints-1).fit(coords_cluster, np.zeros(npoints)) #Fit the KNeighboursClassifier to our data
+        distances = knn.kneighbors()[0] 
+        # Do mean of these distances
+        # Add mean to list
+    
+
+
     #TODO Add an analysis to the mean of the distances in the clusters
     #TODO Por os clusters coloridos com o nº de elems que têm 
