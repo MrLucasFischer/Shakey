@@ -123,10 +123,27 @@ class Assignment:
             print(silhouette_score(coords, labels))
             print(rand_index(self.data["fault"].values, labels))
         else:
+            epsilons_silh = []
+            precision = []
+            recall = []
+            rand = []
+            f1 = []
             for epsilon in epsilons:
                 dbscan = DBSCAN(eps = epsilon, min_samples = 4).fit(coords)
                 labels = dbscan.labels_
                 get_number_of_points_in_clusters(labels)
-                print(silhouette_score(coords, labels))
+                print("Silhouette")
+                silh_score = silhouette_score(coords, labels)
+                epsilons_silh.append((epsilon, silh_score))
+                print(silh_score)
+                print("Rand index")
                 print(rand_index(self.data["fault"].values, labels))
+                r_index = rand_index(self.data["fault"].values, labels)
+                precision.append(r_index[0])
+                recall.append(r_index[1])
+                rand.append(r_index[2])
+                f1.append(r_index[3])
+                print("---")
                 plot_classes(labels, self.data["longitude"].values, self.data["latitude"].values)
+            
+            plot_params(np.array(epsilons_silh), np.array(precision), np.array(recall), np.array(rand), np.array(f1), algorithm = "dbscan")

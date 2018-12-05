@@ -146,7 +146,7 @@ def plot_distances(distances, noise_percentage):
             distances - A list of distances to the 4th nearest neighbor of each point
             noise_percentage - A float value corresponding to an estimated percentage of noise in our data set
 
-        Rerturns
+        Returns
             user_opinion - A string with information about if the user accepted this epsilon value or not
             epsilon_value - The user's estimated epsilon value
     """
@@ -231,7 +231,14 @@ def plot_params(params_silhouette, precision = None, recall = None, rand = None,
     """
         Plots the different params (K or Number of Components) vs the silhouette score obtained for them
     """
-    x_label = "K" if(algorithm == "kmean") else "Number of Components"
+    #x_label = "K" if(algorithm == "kmean") else "Number of Components"
+
+    if (algorithm == "kmean"):
+        x_label = "K"
+    elif (algorithm == "gmm"):
+        x_label = "Number of Components"
+    else:
+        x_label = "epsilon"
 
     plt.figure(figsize = (11, 8))
     font = {
