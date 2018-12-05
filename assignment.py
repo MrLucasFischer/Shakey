@@ -83,7 +83,6 @@ class Assignment:
             ncomponents_metrics.append((num, silh_score, r_index[0], r_index[1], r_index[2], r_index[3]))
 
             plot_classes(labels, self.data["longitude"].values, self.data["latitude"].values, algorithm = "gmm", param = num)   #Plots the seismic events with relation to the "predicted" labels
-            #o gmm.predict_proba(coords) da-nos o grau de pertenca de cada ponto as diferentes gaussianas
         
         plot_params(np.array(ncomponents_metrics), algorithm = "gmm", file_name = "numcomponents_vs_metrics.png") #Plot the different number of components vs their silhouette scores
 

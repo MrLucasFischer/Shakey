@@ -2,10 +2,10 @@ from assignment import Assignment
 
 assignment_2 = Assignment("./data/tp2_data.csv")
 
-ks = [7, 60, 96]   #TODO por aqui valores que façam sentido para vector quantitization (nao sei como se escreve xD)
-num_components = [2, 4, 6]  #TODO por aqui valores que façam sentido (provavelmente pode ser a mesma justificação que o kmeans)
-epsilons = [23.337, 36.726, 69.565] #TODO adicionar mais epsilons
+ks = [7, 51, 96]
+num_components = [7, 51, 96]
+epsilons = [23.337, 36.726, 69.565]
 
-assignment_2.k_means(ks)
-# assignment_2.gaussian_mix(num_components)
-# assignment_2.dbscan(epsilons = epsilons)
+# assignment_2.k_means(ks)    #Kmeans possible aplication -> Vector quantization
+# assignment_2.gaussian_mix(num_components) #GMM possible application -> Generating new points based on the distribution
+assignment_2.dbscan(epsilons = epsilons)  #DBSCAN possible application -> Identifying "denser" regions in terms of seisms
