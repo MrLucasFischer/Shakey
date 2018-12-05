@@ -227,7 +227,7 @@ def rand_index(faults, labels):
     return precision, recall, rand, f1
 
 
-def plot_params(params_silhouette, algorithm = "kmean"):
+def plot_params(params_silhouette, precision = None, recall = None, rand = None, f1 = None, algorithm = "kmean"):
     """
         Plots the different params (K or Number of Components) vs the silhouette score obtained for them
     """
@@ -239,10 +239,22 @@ def plot_params(params_silhouette, algorithm = "kmean"):
     'size'   : 24}
     plt.rc('font', **font)
 
-    plt.plot(params_silhouette[:, 0], params_silhouette[:, 1])  #TODO plot other metrics (param vs rand index, params vs precision etc...)
+    x_axis = params_silhouette[:, 0]
+
+    plt.plot(params_silhouette[:, 0], params_silhouette[:, 1], "-", linewidth = 3 ,label = "silhouette score")  #TODO plot other metrics (param vs rand index, params vs precision etc...)
+
+    if precision is not None: # we don't need to test the others because they are all calculated at the same time
+        plt.plot(x_axis, precision, "-", linewidth = 3 ,label = "precision" )
+        plt.plot(x_axis, recall, "-", linewidth = 3 ,label = "recall" )
+        plt.plot(x_axis, rand, "-", linewidth = 3 ,label = "rand" )
+        plt.plot(x_axis, f1, "-", linewidth = 3 ,label = "f1" )
 
     plt.xlabel(x_label)
-    plt.ylabel("Silhouette Score")
+    if precision is None:
+        plt.ylabel("Silhouette Score")
+    else:
+        plt.ylabel("Metrics")
+    plt.legend()
     plt.show()
 
 

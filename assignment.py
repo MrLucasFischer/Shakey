@@ -43,6 +43,10 @@ class Assignment:
 
         coords = self.data[["x", "y", "z"]].values  #Get the coordinate values from our data
         k_silh = []
+        precision = []
+        recall = []
+        rand = []
+        f1 = []
 
         if(not type(ks) is list):
             ks = [ks]   #We can pass in a number or a list of numbers, if it's not a list then convert it to one
@@ -53,13 +57,20 @@ class Assignment:
             centroids = kmeans.cluster_centers_
 
             silh_score = silhouette_score(coords, labels)
-            print(silh_score)
-            print(rand_index(self.data["fault"].values, labels))
-
             k_silh.append((k, silh_score))
+            #print(silh_score)
+            
+            r_index = rand_index(self.data["fault"].values, labels)
+            precision.append(r_index[0])
+            recall.append(r_index[1])
+            rand.append(r_index[2])
+            f1.append(r_index[3])
+            #print(rand_index(self.data["fault"].values, labels))
+            
             # plot_3D_with_centroids(self.data["x"],self.data["y"],self.data["z"], centroids[:, 0], centroids[:, 1], centroids[:, 2])
-
-        plot_params(np.array(k_silh)) #Plot the different k values vs their silhouette scores
+        print("Sillouette score")
+        print(np.array(k_silh))
+        plot_params(np.array(k_silh),np.array(precision),np.array(recall),np.array(rand),np.array(f1)) #Plot the different k values vs their silhouette scores
 
 
 
@@ -70,6 +81,10 @@ class Assignment:
 
         coords = self.data[["x", "y", "z"]].values
         ncomponents_silh = []
+        precision = []
+        recall = []
+        rand = []
+        f1 = []
 
         if(not type(num_components) is list):
             num_components = [num_components]   #We can pass in a number or a list of numbers, if it's not a list then convert it to one
@@ -79,13 +94,19 @@ class Assignment:
             labels = gmm.predict(coords)
 
             silh_score = silhouette_score(coords, labels)
-            print(silh_score)
-            print(rand_index(self.data["fault"].values, labels))
-            
             ncomponents_silh.append((num, silh_score))
+            print(silh_score)
+
+            print(rand_index(self.data["fault"].values, labels))
+            r_index = rand_index(self.data["fault"].values, labels)
+            precision.append(r_index[0])
+            recall.append(r_index[1])
+            rand.append(r_index[2])
+            f1.append(r_index[3])
+
             #o gmm.predict_proba(coords) da-nos o grau de pertenca de cada ponto as diferentes gaussianas
 
-        plot_params(np.array(ncomponents_silh), algorithm = "gmm") #Plot the different number of components vs their silhouette scores
+        plot_params(np.array(ncomponents_silh), np.array(precision), np.array(recall), np.array(rand), np.array(f1), algorithm = "gmm") #Plot the different number of components vs their silhouette scores
 
 
 
