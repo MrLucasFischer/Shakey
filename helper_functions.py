@@ -276,9 +276,9 @@ def get_number_of_points_in_clusters(labels):
         y_axis.append(np.sum(labels == cluster))
 
     plt.close()
-    plt.figure()    #TODO AUMENTAR O TAMANHO DA IMAGE
+    plt.figure(figsize = (15, 6))    #TODO AUMENTAR O TAMANHO DA IMAGE
     plt.bar(x = x_axis, height = y_axis)
-    plt.xticks(x_axis, x_axis)
+    plt.xticks(x_axis[::5], x_axis[::5])
     plt.yticks(y_axis, y_axis)
     plt.show()
 
