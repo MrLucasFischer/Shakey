@@ -198,7 +198,7 @@ def plot_distances(distances, noise_percentage):
 
 def rand_index(faults, labels):
     """
-        Function that calculates the Rand index metrics (precision, reacall, rand index, F1)
+        Function that calculates the Rand index metrics (precision, recall, rand index, F1)
 
         Params:
             faults - number of the fault the point belongs to (-1 if it does not belong to any fault)
@@ -314,6 +314,20 @@ def plot_number_of_points_in_clusters(labels, epsilon):
     plt.show()
     plt.close()
 
+    # Plot histogram
+    plt.figure(figsize = (15, 8))
+    plt.title("Histogram of # Points per cluster")
+    bins = np.linspace(0, max(y_axis), num=1+(max(y_axis))/4)
+    plt.hist(y_axis, bins=bins)
+    plt.grid(True)
+    plt.xlabel("# Points in Cluster")
+    plt.ylabel("Frequency of clusters")
+    file_name = f"hist_num_points_in_cluster_eps={round(epsilon, 1)}.png"
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
+    plt.show()
+    plt.close()
+
 
 def plot_mean_distances_in_clusters(coords, labels, epsilon):
     """
@@ -347,6 +361,24 @@ def plot_mean_distances_in_clusters(coords, labels, epsilon):
     plt.yticks(range(int(np.max(y_axis)))[::10], range(int(np.max(y_axis)))[::10] )
 
     file_name = f"dist_within_cluster_eps={round(epsilon, 1)}.png"
+    plt.savefig(__image_dir + "/" + file_name, dpi=300)
+    plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
+    plt.show()
+    plt.close()
+
+    # Plot histogram
+    plt.figure(figsize = (15, 8))
+    font = {
+    'weight' : 'regular',
+    'size'   : 24}
+    plt.rc('font', **font)
+    plt.title("Histogram of Mean intra-cluster distance")
+    bins2 = np.linspace(0, max(y_axis), num=1+(max(y_axis))/10)
+    plt.hist(y_axis, bins=bins2)
+    plt.grid(True)
+    plt.xlabel("Mean intra-cluster distance")
+    plt.ylabel("Frequency of clusters")
+    file_name = f"hist_dist_within_cluster_eps={round(epsilon, 1)}.png"
     plt.savefig(__image_dir + "/" + file_name, dpi=300)
     plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
     plt.show()
