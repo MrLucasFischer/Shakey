@@ -383,5 +383,3 @@ def plot_mean_distances_in_clusters(coords, labels, epsilon):
     plt.savefig(__image_dir + "/" + file_name[0:-3]+"eps", dpi=300)
     plt.show()
     plt.close()
-
-    #TODO Por os clusters coloridos com o nº de elems que têm
